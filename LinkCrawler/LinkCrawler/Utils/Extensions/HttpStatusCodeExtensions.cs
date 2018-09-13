@@ -8,16 +8,19 @@ namespace LinkCrawler.Utils.Extensions
     public static class HttpStatusCodeExtensions
     {
         /// <summary>
-        /// This method will determine if an HttpStatusCode represents a "success" or not
-        /// based on the configuration string you pass in.
+        /// This method will determine if an HttpStatusCode matches the expression in
+        /// the configuration string you pass in.
         /// You can pass literal codes like 100, 200, 404
         /// Or you can pass in simple patterns using "x"s as wildcards like: 1xx, xx4
         /// </summary>
         /// <param name="this">The HttpStatus code to use</param>
         /// <param name="configuredCodes">CSV of HttpStatus codes</param>
         /// <returns></returns>
-        public static bool IsSuccess(this HttpStatusCode @this, string configuredCodes)
+        public static bool IsMatch(this HttpStatusCode @this, string configuredCodes)
         {
+            // if * is passed in, return true (helpful if app.config setting is missing)
+            if (configuredCodes.Equals("*")) return true;
+
             var codeCollection = configuredCodes
                 .Split(new string[] {","}, StringSplitOptions.RemoveEmptyEntries)   // split into array
                 .Select(c => c.Trim().ToLower())          // trim off any spaces, and make lowercase (this allows for "100,20X" and "100, 20x)"

@@ -10,6 +10,7 @@ namespace LinkCrawler.Models
         HttpStatusCode StatusCode { get; }
         int StatusCodeNumber { get; }
         bool IsSuccess { get; }
+        bool IsInteresting { get; }
         bool ShouldCrawl { get; }
         string ToString();
     }

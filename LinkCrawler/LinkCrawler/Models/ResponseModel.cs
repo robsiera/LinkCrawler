@@ -16,6 +16,7 @@ namespace LinkCrawler.Models
         public HttpStatusCode StatusCode { get; }
         public int StatusCodeNumber { get { return (int)StatusCode; } }
         public bool IsSuccess { get; }
+        public bool IsInteresting { get; }
         public bool ShouldCrawl { get; }
         public string ErrorMessage { get; }
 
@@ -26,6 +27,7 @@ namespace LinkCrawler.Models
             RequestedUrl = requestModel.Url;
             Location = restResponse.GetHeaderByName("Location"); // returns null if no Location header present in the response
             ErrorMessage = restResponse.ErrorMessage;
+            IsInteresting = settings.IsInteresting(StatusCode);
 
             IsSuccess = settings.IsSuccess(StatusCode);
             if (!IsSuccess)
@@ -49,7 +51,7 @@ namespace LinkCrawler.Models
             }
             else
             {
-                if (StatusCodeNumber == 301 || StatusCodeNumber == 302)
+                if (!String.IsNullOrEmpty(Location))
                 {
                     return $"{StatusCodeNumber}\t{StatusCode}\t{RequestedUrl}{Environment.NewLine}\t->\t{Location}";
                 }

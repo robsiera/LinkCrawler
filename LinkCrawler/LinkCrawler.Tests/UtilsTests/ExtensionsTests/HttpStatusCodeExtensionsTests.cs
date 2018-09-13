@@ -17,7 +17,7 @@ namespace LinkCrawler.Tests.UtilsTests.ExtensionsTests
         [TestCase(HttpStatusCode.OK ,"2xx,xX0", true, Description = "Multiple wildcard codes allowed")]
         public void Will_match_a_single_code_exactly(HttpStatusCode givenCode, string givenConfig, bool expectedOutcome)
         {
-            var result = givenCode.IsSuccess(givenConfig);
+            var result = givenCode.IsMatch(givenConfig);
 
             Assert.That(result, Is.EqualTo(expectedOutcome));
         }

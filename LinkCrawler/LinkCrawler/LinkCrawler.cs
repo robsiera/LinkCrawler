@@ -86,18 +86,21 @@ namespace LinkCrawler
 
         public void WriteOutput(IResponseModel responseModel)
         {
-            if (!responseModel.IsSuccess)
+            if (responseModel.IsInteresting)
             {
-                foreach (var output in Outputs)
+                if (!responseModel.IsSuccess)
                 {
-                    output.WriteError(responseModel);
+                    foreach (var output in Outputs)
+                    {
+                        output.WriteError(responseModel);
+                    }
                 }
-            }
-            else if (!OnlyReportBrokenLinksToOutput)
-            {
-                foreach (var output in Outputs)
+                else if (!OnlyReportBrokenLinksToOutput)
                 {
-                    output.WriteInfo(responseModel);
+                    foreach (var output in Outputs)
+                    {
+                        output.WriteInfo(responseModel);
+                    }
                 }
             }
 
