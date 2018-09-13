@@ -45,7 +45,13 @@ namespace LinkCrawler.Utils.Settings
         public bool IsSuccess(HttpStatusCode statusCode)
         {
             var configuredCodes = ConfigurationManager.AppSettings[Constants.AppSettings.SuccessHttpStatusCodes] ?? "";
-            return statusCode.IsSuccess(configuredCodes);
+            return statusCode.IsMatch(configuredCodes);
+        }
+
+        public bool IsInteresting(HttpStatusCode statusCode)
+        {
+            var configuredCodes = ConfigurationManager.AppSettings[Constants.AppSettings.InterestingHttpStatusCodes] ?? "*";
+            return statusCode.IsMatch(configuredCodes);
         }
     }
 }

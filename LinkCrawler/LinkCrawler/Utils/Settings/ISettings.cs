@@ -28,6 +28,8 @@ namespace LinkCrawler.Utils.Settings
 
         bool IsSuccess(HttpStatusCode statusCode);
 
+        bool IsInteresting(HttpStatusCode statusCode);
+
         bool PrintSummary { get; }
     }
 }
