@@ -10,6 +10,8 @@ namespace LinkCrawler.Utils.Settings
 
         bool CheckImages { get; }
 
+        bool FollowRedirects { get; }
+
         bool OnlyReportBrokenLinksToOutput { get; }
 
         string SlackWebHookUrl { get; }
@@ -29,6 +31,8 @@ namespace LinkCrawler.Utils.Settings
         bool IsSuccess(HttpStatusCode statusCode);
 
         bool IsInteresting(HttpStatusCode statusCode);
+
+        bool IsRedirect(HttpStatusCode statusCode);
 
         bool PrintSummary { get; }
     }

@@ -16,6 +16,7 @@ namespace LinkCrawler
     {
         public string BaseUrl { get; set; }
         public bool CheckImages { get; set; }
+        public bool FollowRedirects { get; set; }
         public RestRequest RestRequest { get; set; }
         public IEnumerable<IOutput> Outputs { get; set; }
         public IValidUrlParser ValidUrlParser { get; set; }
@@ -30,6 +31,7 @@ namespace LinkCrawler
             Outputs = outputs;
             ValidUrlParser = validUrlParser;
             CheckImages = settings.CheckImages;
+            FollowRedirects = settings.FollowRedirects;
             UrlList = new List<LinkModel>();
             RestRequest = new RestRequest(Method.GET).SetHeader("Accept", "*/*");
             OnlyReportBrokenLinksToOutput = settings.OnlyReportBrokenLinksToOutput;
@@ -47,7 +49,7 @@ namespace LinkCrawler
         public void SendRequest(string crawlUrl, string referrerUrl = "")
         {
             var requestModel = new RequestModel(crawlUrl, referrerUrl, BaseUrl);
-            var restClient = new RestClient(new Uri(crawlUrl)) { FollowRedirects = false };
+            var restClient = new RestClient(new Uri(crawlUrl)) { FollowRedirects = false }; // we don't want RestSharp following the redirects, otherwise we won't see them
 
             restClient.ExecuteAsync(RestRequest, response =>
             {
@@ -63,6 +65,18 @@ namespace LinkCrawler
         {
             WriteOutput(responseModel);
 
+            // follow 3xx redirects
+            if (FollowRedirects && responseModel.IsRedirect)
+            {
+                string redirectUrl;
+                if (responseModel.Location.StartsWith("/"))
+                    redirectUrl = responseModel.RequestedUrl.GetUrlBase() + responseModel.Location;
+                else
+                    redirectUrl = responseModel.Location;
+                SendRequest(redirectUrl, responseModel.RequestedUrl);
+            }
+
+            // follow internal links in response
             if (responseModel.ShouldCrawl)
                 CrawlForLinksInResponse(responseModel);
         }

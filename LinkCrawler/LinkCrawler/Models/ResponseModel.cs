@@ -3,6 +3,7 @@ using RestSharp;
 using System;
 using System.Net;
 using LinkCrawler.Utils.Settings;
+using System.Collections.Generic;
 
 namespace LinkCrawler.Models
 {
@@ -17,6 +18,7 @@ namespace LinkCrawler.Models
         public int StatusCodeNumber { get { return (int)StatusCode; } }
         public bool IsSuccess { get; }
         public bool IsInteresting { get; }
+        public bool IsRedirect { get; }
         public bool ShouldCrawl { get; }
         public string ErrorMessage { get; }
 
@@ -27,11 +29,13 @@ namespace LinkCrawler.Models
             RequestedUrl = requestModel.Url;
             Location = restResponse.GetHeaderByName("Location"); // returns null if no Location header present in the response
             ErrorMessage = restResponse.ErrorMessage;
-            IsInteresting = settings.IsInteresting(StatusCode);
-
             IsSuccess = settings.IsSuccess(StatusCode);
+            IsInteresting = settings.IsInteresting(StatusCode);
+            IsRedirect = settings.IsRedirect(StatusCode);
+
             if (!IsSuccess)
                 return;
+
             Markup = restResponse.Content;
             ShouldCrawl = IsSuccess && requestModel.IsInternalUrl && restResponse.IsHtmlDocument();
         }

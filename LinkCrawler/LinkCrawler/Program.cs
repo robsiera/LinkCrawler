@@ -3,6 +3,7 @@ using StructureMap;
 using System;
 using LinkCrawler.Utils.Parsers;
 using LinkCrawler.Utils.Settings;
+using LinkCrawler.Utils.Extensions;
 
 namespace LinkCrawler
 {
@@ -21,13 +22,7 @@ namespace LinkCrawler
                     if (result)
                     {
                         // make sure the base URL is just a domain
-                        int prefixLength = parsed.IndexOf("//") + 2;
-                        if (parsed.Substring(prefixLength).IndexOf("/") > 0)
-                        {
-                            parsed = parsed.Substring(0, parsed.Substring(prefixLength).IndexOf("/") + prefixLength);
-                        }
-                        linkCrawler.BaseUrl = parsed;
-                        validUrlParser.BaseUrl = parsed;
+                        linkCrawler.BaseUrl = validUrlParser.BaseUrl = parsed.GetUrlBase();
                         linkCrawler.ValidUrlParser = validUrlParser;
                     }
                 }
