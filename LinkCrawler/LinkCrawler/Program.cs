@@ -32,7 +32,7 @@ namespace LinkCrawler
                     }
                 }
                 linkCrawler.Start();
-                // this line *has* to be here in order to flush the output to the console, otherwise we don't see anything - why?
+                // this line *has* to be here, because otherwise the app finishes before the asynchronous HTTP requests have returned
                 Console.Read();
             }
         }
