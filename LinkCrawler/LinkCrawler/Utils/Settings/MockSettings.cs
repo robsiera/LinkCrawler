@@ -8,6 +8,8 @@ namespace LinkCrawler.Utils.Settings {
 
         public bool CheckImages => true;
 
+        public bool FollowRedirects => true;
+
         public string CsvDelimiter => ";";
 
         public string CsvFilePath => @"C:\tmp\output.csv";
@@ -38,6 +40,11 @@ namespace LinkCrawler.Utils.Settings {
         }
 
         public bool IsInteresting(HttpStatusCode statusCode)
+        {
+            return statusCode.IsMatch("*");
+        }
+
+        public bool IsRedirect(HttpStatusCode statusCode)
         {
             return statusCode.IsMatch("3xx");
         }

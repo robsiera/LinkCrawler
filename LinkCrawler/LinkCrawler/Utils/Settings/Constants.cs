@@ -8,6 +8,7 @@
             public const string ValidUrlRegex = "ValidUrlRegex";
             public const string OnlyReportBrokenLinksToOutput = "OnlyReportBrokenLinksToOutput";
             public const string CheckImages = "CheckImages";
+            public const string FollowRedirects = "FollowRedirects";
             public const string SlackWebHookUrl = "Slack.WebHook.Url";
             public const string SlackWebHookBotName = "Slack.WebHook.Bot.Name";
             public const string SlackWebHookBotIconEmoji = "Slack.WebHook.Bot.IconEmoji";
@@ -17,6 +18,7 @@
             public const string CsvDelimiter = "Csv.Delimiter";
             public const string SuccessHttpStatusCodes = "SuccessHttpStatusCodes";
             public const string InterestingHttpStatusCodes = "InterestingHttpStatusCodes";
+            public const string RedirectHttpStatusCodes = "RedirectHttpStatusCodes";
             public const string OutputProviders = "outputProviders";
             public const string PrintSummary = "PrintSummary";
         }
