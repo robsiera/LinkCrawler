@@ -40,13 +40,15 @@ namespace LinkCrawler.Models
         {
             if (!IsSuccess)
             {
+                // cater for HTTP "999" codes returned
+                string statusCode = StatusCodeNumber == 999 ? "[Request denied]" : StatusCode.ToString();
                 if (!String.IsNullOrEmpty(ErrorMessage))
                 {
-                    return $"{StatusCodeNumber}\t{StatusCode}\t{RequestedUrl}{Environment.NewLine}\tError:\t{ErrorMessage}{Environment.NewLine}\tReferer:\t{ReferrerUrl}";
+                    return $"{StatusCodeNumber}\t{statusCode}\t{RequestedUrl}{Environment.NewLine}\tError:\t{ErrorMessage}{Environment.NewLine}\tReferer:\t{ReferrerUrl}";
                 }
                 else
                 {
-                    return $"{StatusCodeNumber}\t{StatusCode}\t{RequestedUrl}{Environment.NewLine}\tReferer:\t{ReferrerUrl}";
+                    return $"{StatusCodeNumber}\t{statusCode}\t{RequestedUrl}{Environment.NewLine}\tReferer:\t{ReferrerUrl}";
                 }
             }
             else
