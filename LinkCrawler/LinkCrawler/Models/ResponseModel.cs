@@ -13,6 +13,7 @@ namespace LinkCrawler.Models
         public string RequestedUrl { get; }
         public string ReferrerUrl { get; }
         public string Location { get; }
+        public IList<RestResponseCookie> Cookies { get; }
 
         public HttpStatusCode StatusCode { get; }
         public int StatusCodeNumber { get { return (int)StatusCode; } }
@@ -20,7 +21,7 @@ namespace LinkCrawler.Models
         public bool IsInteresting { get; }
         public bool IsRedirect { get; }
         public bool ShouldCrawl { get; }
-        public string ErrorMessage { get; }
+        private string ErrorMessage { get; }
 
         public ResponseModel(IRestResponse restResponse, RequestModel requestModel, ISettings settings)
         {
@@ -29,6 +30,8 @@ namespace LinkCrawler.Models
             RequestedUrl = requestModel.Url;
             Location = restResponse.GetHeaderByName("Location"); // returns null if no Location header present in the response
             ErrorMessage = restResponse.ErrorMessage;
+            Cookies = restResponse.Cookies;
+
             IsSuccess = settings.IsSuccess(StatusCode);
             IsInteresting = settings.IsInteresting(StatusCode);
             IsRedirect = settings.IsRedirect(StatusCode);

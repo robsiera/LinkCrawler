@@ -17,11 +17,12 @@ namespace LinkCrawler
         public string BaseUrl { get; set; }
         public bool CheckImages { get; set; }
         public bool FollowRedirects { get; set; }
-        public RestRequest RestRequest { get; set; }
+        private RestRequest GetRequest { get; set; }
+        private RestClient Client{ get; set; }
         public IEnumerable<IOutput> Outputs { get; set; }
         public IValidUrlParser ValidUrlParser { get; set; }
         public bool OnlyReportBrokenLinksToOutput { get; set; }
-        public static List<LinkModel> UrlList;
+        public List<LinkModel> UrlList;
         private ISettings _settings;
         private Stopwatch timer;
 
@@ -33,7 +34,10 @@ namespace LinkCrawler
             CheckImages = settings.CheckImages;
             FollowRedirects = settings.FollowRedirects;
             UrlList = new List<LinkModel>();
-            RestRequest = new RestRequest(Method.GET).SetHeader("Accept", "*/*");
+            GetRequest = new RestRequest(Method.GET).SetHeader("Accept", "*/*");
+            Client = new RestClient() { FollowRedirects = false }; // we don't want RestSharp following the redirects, otherwise we won't see them
+            // https://stackoverflow.com/questions/8823349/how-do-i-use-the-cookie-container-with-restsharp-and-asp-net-sessions - set cookies up according to this link?
+
             OnlyReportBrokenLinksToOutput = settings.OnlyReportBrokenLinksToOutput;
             _settings = settings;
             this.timer = new Stopwatch();
@@ -49,9 +53,9 @@ namespace LinkCrawler
         public void SendRequest(string crawlUrl, string referrerUrl = "")
         {
             var requestModel = new RequestModel(crawlUrl, referrerUrl, BaseUrl);
-            var restClient = new RestClient(new Uri(crawlUrl)) { FollowRedirects = false }; // we don't want RestSharp following the redirects, otherwise we won't see them
+            Client.BaseUrl = new Uri(crawlUrl);
 
-            restClient.ExecuteAsync(RestRequest, response =>
+            Client.ExecuteAsync(GetRequest, response =>
             {
                 if (response == null)
                     return;
@@ -67,25 +71,34 @@ namespace LinkCrawler
 
             // follow 3xx redirects
             if (FollowRedirects && responseModel.IsRedirect)
-            {
-                string redirectUrl;
-                if (responseModel.Location.StartsWith("/"))
-                    redirectUrl = responseModel.RequestedUrl.GetUrlBase() + responseModel.Location;
-                else
-                    redirectUrl = responseModel.Location;
-                SendRequest(redirectUrl, responseModel.RequestedUrl);
-            }
+                FollowRedirect(responseModel);
 
             // follow internal links in response
             if (responseModel.ShouldCrawl)
-                CrawlForLinksInResponse(responseModel);
+                CrawlLinksInResponse(responseModel);
         }
 
-        public void CrawlForLinksInResponse(IResponseModel responseModel)
+        private void FollowRedirect(IResponseModel responseModel)
+        {
+            string redirectUrl;
+            if (responseModel.Location.StartsWith("/"))
+                redirectUrl = responseModel.RequestedUrl.GetUrlBase() + responseModel.Location; // add base URL to relative links
+            else
+                redirectUrl = responseModel.Location;
+
+            SendRequest(redirectUrl, responseModel.RequestedUrl);
+        }
+
+        public void CrawlLinksInResponse(IResponseModel responseModel)
         {
             var linksFoundInMarkup = MarkupHelpers.GetValidUrlListFromMarkup(responseModel.Markup, ValidUrlParser, CheckImages);
 
-            foreach (var url in linksFoundInMarkup)
+            SendRequestsToLinks(linksFoundInMarkup, responseModel.RequestedUrl);
+        }
+
+        private void SendRequestsToLinks(List<string> urls, string referrerUrl)
+        {
+            foreach (string url in urls)
             {
                 lock (UrlList)
                 {
@@ -94,7 +107,7 @@ namespace LinkCrawler
 
                     UrlList.Add(new LinkModel(url));
                 }
-                SendRequest(url, responseModel.RequestedUrl);
+                SendRequest(url, referrerUrl);
             }
         }
 

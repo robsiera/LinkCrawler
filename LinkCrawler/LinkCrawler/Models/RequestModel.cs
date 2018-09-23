@@ -7,7 +7,7 @@ namespace LinkCrawler.Models
         public string Url;
         public string ReferrerUrl;
         public bool IsInternalUrl { get; set; }
-        public RestClient Client;
+        private readonly RestClient Client;
 
         public RequestModel(string url, string referrerUrl, string baseUrl)
         {

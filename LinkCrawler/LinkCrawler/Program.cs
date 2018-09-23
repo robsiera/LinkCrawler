@@ -11,7 +11,6 @@ namespace LinkCrawler
     {
         static void Main(string[] args)
         {
-            
             using (var container = Container.For<StructureMapRegistry>())
             {
                 var linkCrawler = container.GetInstance<LinkCrawler>();

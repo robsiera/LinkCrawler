@@ -49,7 +49,7 @@ namespace LinkCrawler.Tests
             var mockResponseModel = new Mock<IResponseModel>();
             mockResponseModel.Setup(x => x.Markup).Returns(markup);
 
-            LinkCrawler.CrawlForLinksInResponse(mockResponseModel.Object);
+            LinkCrawler.CrawlLinksInResponse(mockResponseModel.Object);
             Assert.That(LinkCrawler.UrlList.Where(l=>l.Address == url).Count() > 0);
         }
     }
