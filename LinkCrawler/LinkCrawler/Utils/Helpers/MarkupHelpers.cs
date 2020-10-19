@@ -20,7 +20,7 @@ namespace LinkCrawler.Utils.Helpers
             return nodes.Select(x => x.GetAttributeValue(attribute, string.Empty).TrimEnd('/')).ToList();
         }
 
-        public static List<string> GetAllUrlsFromMarkup(string markup, bool checkImageTags)
+        private static List<string> GetAllUrlsFromMarkup(string markup, bool checkImageTags)
         {
             var linkUrls = GetAllUrlsFromHtmlDocument(markup, Constants.Html.LinkSearchPattern, Constants.Html.Href);
             if (checkImageTags)

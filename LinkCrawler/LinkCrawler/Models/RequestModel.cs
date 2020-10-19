@@ -4,10 +4,10 @@ namespace LinkCrawler.Models
 {
     public class RequestModel
     {
-        public string Url;
-        public string ReferrerUrl;
-        public bool IsInternalUrl { get; set; }
-        private readonly RestClient Client;
+        public readonly string Url;
+        public readonly string ReferrerUrl;
+        public bool IsInternalUrl { get; }
+        public RestClient Client;
 
         public RequestModel(string url, string referrerUrl, string baseUrl)
         {

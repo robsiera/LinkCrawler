@@ -15,16 +15,16 @@ namespace LinkCrawler
     public class LinkCrawler
     {
         public string BaseUrl { get; set; }
-        public bool CheckImages { get; set; }
-        public bool FollowRedirects { get; set; }
-        private RestRequest GetRequest { get; set; }
-        private RestClient Client{ get; set; }
-        public IEnumerable<IOutput> Outputs { get; set; }
+        private bool CheckImages { get; }
+        private bool FollowRedirects { get; }
+        private RestRequest GetRequest { get; }
+        private RestClient Client { get; }
+        private IEnumerable<IOutput> Outputs { get; }
         public IValidUrlParser ValidUrlParser { get; set; }
-        public bool OnlyReportBrokenLinksToOutput { get; set; }
-        public List<LinkModel> UrlList;
-        private ISettings _settings;
-        private Stopwatch timer;
+        private bool OnlyReportBrokenLinksToOutput { get; }
+        public readonly List<LinkModel> UrlList;
+        private readonly ISettings _settings;
+        private readonly Stopwatch timer;
 
         public LinkCrawler(IEnumerable<IOutput> outputs, IValidUrlParser validUrlParser, ISettings settings)
         {
@@ -50,7 +50,7 @@ namespace LinkCrawler
             SendRequest(BaseUrl);
         }
 
-        public void SendRequest(string crawlUrl, string referrerUrl = "")
+        private void SendRequest(string crawlUrl, string referrerUrl = "")
         {
             var requestModel = new RequestModel(crawlUrl, referrerUrl, BaseUrl);
             Client.BaseUrl = new Uri(crawlUrl);
@@ -65,7 +65,7 @@ namespace LinkCrawler
             });
         }
 
-        public void ProcessResponse(IResponseModel responseModel)
+        private void ProcessResponse(IResponseModel responseModel)
         {
             WriteOutput(responseModel);
 
@@ -102,7 +102,7 @@ namespace LinkCrawler
             {
                 lock (UrlList)
                 {
-                    if (UrlList.Where(l => l.Address == url).Count() > 0)
+                    if (UrlList.Count(l => l.Address == url) > 0)
                         continue;
 
                     UrlList.Add(new LinkModel(url));
@@ -146,7 +146,7 @@ namespace LinkCrawler
                 }
 
                 // Then check to see whether there are any pending links left to check
-                if ((UrlList.Count > 1) && (UrlList.Where(l => l.CheckingFinished == false).Count() == 0))
+                if (UrlList.Count > 1 && UrlList.Count(l => l.CheckingFinished == false) == 0)
                 {
                     FinaliseSession();
                 }
@@ -161,16 +161,16 @@ namespace LinkCrawler
                 List<string> messages = new List<string>();
                 messages.Add(""); // add blank line to differentiate summary from main output
 
-                messages.Add("Processing complete. Checked " + UrlList.Count() + " links in " + this.timer.ElapsedMilliseconds.ToString() + "ms");
+                messages.Add("Processing complete. Checked " + UrlList.Count() + " links in " + this.timer.ElapsedMilliseconds + "ms");
 
                 messages.Add("");
                 messages.Add(" Status | # Links");
                 messages.Add(" -------+--------");
 
                 IEnumerable<IGrouping<int, string>> StatusSummary = UrlList.GroupBy(link => link.StatusCode, link => link.Address);
-                foreach(IGrouping<int,string> statusGroup in StatusSummary)
+                foreach (IGrouping<int, string> statusGroup in StatusSummary)
                 {
-                    messages.Add(String.Format("   {0}  | {1,5}", statusGroup.Key, statusGroup.Count()));
+                    messages.Add($"   {statusGroup.Key}  | {statusGroup.Count(),5}");
                 }
 
                 foreach (var output in Outputs)

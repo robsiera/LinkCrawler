@@ -33,20 +33,11 @@ namespace LinkCrawler.Utils
 
                     if (concreteType == null)
                     {
-                        throw new ConfigurationErrorsException(string.Format(
-                            "Output provider '{0}' not found: {1}",
-                            provider.Key,
-                            provider.Value
-                        ));
-                    }
+                        throw new ConfigurationErrorsException($"Output provider '{provider.Key}' not found: {provider.Value}"); }
 
                     if (!concreteType.GetInterfaces().Contains(pluginType))
                     {
-                        throw new ConfigurationErrorsException(string.Format(
-                            "Output provider '{0}' does not implement IOutput: {1}",
-                            provider.Key,
-                            provider.Value
-                        ));
+                        throw new ConfigurationErrorsException($"Output provider '{provider.Key}' does not implement IOutput: {provider.Value}");
                     }
 
                     For(pluginType).Add(concreteType).Named(provider.Key);
