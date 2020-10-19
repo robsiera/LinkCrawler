@@ -30,5 +30,15 @@ namespace LinkCrawler.Utils.Extensions
             }
             return input;
         }
+
+        public static string GetUrlBase(this string url)
+        {
+            int prefixLength = url.IndexOf("//") + 2;
+            if (url.Substring(prefixLength).IndexOf("/") > 0)
+            {
+                return url.Substring(0, url.Substring(prefixLength).IndexOf("/") + prefixLength);
+            }
+            else return url;
+        }
     }
 }

@@ -3,6 +3,7 @@ using RestSharp;
 using System;
 using System.Net;
 using LinkCrawler.Utils.Settings;
+using System.Collections.Generic;
 
 namespace LinkCrawler.Models
 {
@@ -11,20 +12,33 @@ namespace LinkCrawler.Models
         public string Markup { get; }
         public string RequestedUrl { get; }
         public string ReferrerUrl { get; }
+        public string Location { get; }
+        public IList<RestResponseCookie> Cookies { get; }
 
         public HttpStatusCode StatusCode { get; }
         public int StatusCodeNumber { get { return (int)StatusCode; } }
         public bool IsSuccess { get; }
+        public bool IsInteresting { get; }
+        public bool IsRedirect { get; }
         public bool ShouldCrawl { get; }
+        private string ErrorMessage { get; }
 
         public ResponseModel(IRestResponse restResponse, RequestModel requestModel, ISettings settings)
         {
             ReferrerUrl = requestModel.ReferrerUrl;
             StatusCode = restResponse.StatusCode;
             RequestedUrl = requestModel.Url;
+            Location = restResponse.GetHeaderByName("Location"); // returns null if no Location header present in the response
+            ErrorMessage = restResponse.ErrorMessage;
+            Cookies = restResponse.Cookies;
+
             IsSuccess = settings.IsSuccess(StatusCode);
+            IsInteresting = settings.IsInteresting(StatusCode);
+            IsRedirect = settings.IsRedirect(StatusCode);
+
             if (!IsSuccess)
                 return;
+
             Markup = restResponse.Content;
             ShouldCrawl = IsSuccess && requestModel.IsInternalUrl && restResponse.IsHtmlDocument();
         }
@@ -32,9 +46,29 @@ namespace LinkCrawler.Models
         public override string ToString()
         {
             if (!IsSuccess)
-                return string.Format("{0}\t{1}\t{2}{3}\tReferer:\t{4}", StatusCodeNumber, StatusCode, RequestedUrl, Environment.NewLine, ReferrerUrl);
-
-            return string.Format("{0}\t{1}\t{2}", StatusCodeNumber, StatusCode, RequestedUrl);
+            {
+                // cater for HTTP "999" codes returned
+                string statusCode = StatusCodeNumber == 999 ? "[Request denied]" : StatusCode.ToString();
+                if (!String.IsNullOrEmpty(ErrorMessage))
+                {
+                    return $"{StatusCodeNumber}\t{statusCode}\t{RequestedUrl}{Environment.NewLine}\tError:\t{ErrorMessage}{Environment.NewLine}\tReferer:\t{ReferrerUrl}";
+                }
+                else
+                {
+                    return $"{StatusCodeNumber}\t{statusCode}\t{RequestedUrl}{Environment.NewLine}\tReferer:\t{ReferrerUrl}";
+                }
+            }
+            else
+            {
+                if (!String.IsNullOrEmpty(Location))
+                {
+                    return $"{StatusCodeNumber}\t{StatusCode}\t{RequestedUrl}{Environment.NewLine}\t->\t{Location}";
+                }
+                else
+                {
+                    return $"{StatusCodeNumber}\t{StatusCode}\t{RequestedUrl}";
+                }
+            }
         }
     }
 }

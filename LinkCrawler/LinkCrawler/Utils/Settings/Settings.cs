@@ -15,6 +15,9 @@ namespace LinkCrawler.Utils.Settings
         public bool CheckImages =>
             ConfigurationManager.AppSettings[Constants.AppSettings.CheckImages].ToBool();
 
+        public bool FollowRedirects =>
+            ConfigurationManager.AppSettings[Constants.AppSettings.FollowRedirects].ToBool();
+
         public bool OnlyReportBrokenLinksToOutput =>
             ConfigurationManager.AppSettings[Constants.AppSettings.OnlyReportBrokenLinksToOutput].ToBool();
 
@@ -45,7 +48,19 @@ namespace LinkCrawler.Utils.Settings
         public bool IsSuccess(HttpStatusCode statusCode)
         {
             var configuredCodes = ConfigurationManager.AppSettings[Constants.AppSettings.SuccessHttpStatusCodes] ?? "";
-            return statusCode.IsSuccess(configuredCodes);
+            return statusCode.IsMatch(configuredCodes);
+        }
+
+        public bool IsInteresting(HttpStatusCode statusCode)
+        {
+            var configuredCodes = ConfigurationManager.AppSettings[Constants.AppSettings.InterestingHttpStatusCodes] ?? "*";
+            return statusCode.IsMatch(configuredCodes);
+        }
+
+        public bool IsRedirect(HttpStatusCode statusCode)
+        {
+            var configuredCodes = ConfigurationManager.AppSettings[Constants.AppSettings.RedirectHttpStatusCodes] ?? "3xx";
+            return statusCode.IsMatch(configuredCodes);
         }
     }
 }
