@@ -6,7 +6,8 @@
         {
             public const string BaseUrl = "BaseUrl";
             public const string ValidUrlRegex = "ValidUrlRegex";
-            public const string OnlyReportBrokenLinksToOutput = "OnlyReportBrokenLinksToOutput";
+            public const string ReportOnRedirect = "ReportOnRedirect";
+            public const string ReportOnSuccess = "ReportOnSuccess";
             public const string CheckImages = "CheckImages";
             public const string FollowRedirects = "FollowRedirects";
             public const string SlackWebHookUrl = "Slack.WebHook.Url";

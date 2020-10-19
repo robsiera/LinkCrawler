@@ -12,7 +12,9 @@ namespace LinkCrawler.Utils.Settings
 
         bool FollowRedirects { get; }
 
-        bool OnlyReportBrokenLinksToOutput { get; }
+        bool ReportOnRedirect { get; }
+
+        bool ReportOnSuccess { get; }
 
         string SlackWebHookUrl { get; }
 

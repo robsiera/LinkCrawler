@@ -18,8 +18,11 @@ namespace LinkCrawler.Utils.Settings
         public bool FollowRedirects =>
             ConfigurationManager.AppSettings[Constants.AppSettings.FollowRedirects].ToBool();
 
-        public bool OnlyReportBrokenLinksToOutput =>
-            ConfigurationManager.AppSettings[Constants.AppSettings.OnlyReportBrokenLinksToOutput].ToBool();
+        public bool ReportOnRedirect =>
+            ConfigurationManager.AppSettings[Constants.AppSettings.ReportOnRedirect].ToBool();
+
+        public bool ReportOnSuccess =>
+            ConfigurationManager.AppSettings[Constants.AppSettings.ReportOnSuccess].ToBool();
 
         public string SlackWebHookUrl =>
             ConfigurationManager.AppSettings[Constants.AppSettings.SlackWebHookUrl];

@@ -26,7 +26,7 @@ namespace LinkCrawler.Utils.Outputs
 
             if (fileMode == FileMode.Create)
             {
-                _writer.WriteLine("Code{0}Status{0}Url{0}Referer", _settings.CsvDelimiter);
+                _writer.WriteLine("Code{0}Status{0}Url{0}Referer{0}Location{0}Error", _settings.CsvDelimiter);
             }
         }
 
@@ -47,14 +47,18 @@ namespace LinkCrawler.Utils.Outputs
 
         private void Write(IResponseModel responseModel)
         {
-            _writer?.WriteLine("{1}{0}{2}{0}{3}{0}{4}{0}{5}",
-                _settings.CsvDelimiter,
-                responseModel.StatusCodeNumber,
-                responseModel.StatusCode,
-                responseModel.RequestedUrl,
-                responseModel.ReferrerUrl,
-                responseModel.ErrorMessage
-                );
+            var reqUrl = responseModel.RequestedUrl;
+            //if (_settings.CsvDelimiter == ";" && reqUrl.Contains("&amp;"))
+            //{
+            //    reqUrl = $"ERROR: delimited replaced by #!#: {reqUrl.Replace("&amp;", "#!#")}";
+            //}
+            var refUrl = responseModel.ReferrerUrl;
+            //if (_settings.CsvDelimiter == ";" && refUrl.Contains("&amp;"))
+            //{
+            //    refUrl = $"ERROR: delimited replaced by #!#: {refUrl.Replace("&amp;", "#!#")}";
+            //}
+            var lineOut = $@"{responseModel.StatusCodeNumber}{_settings.CsvDelimiter}""{responseModel.StatusCode}""{_settings.CsvDelimiter}""{reqUrl}""{_settings.CsvDelimiter}""{refUrl}""{_settings.CsvDelimiter}""{responseModel.Location}""{_settings.CsvDelimiter}""{responseModel.ErrorMessage}""";
+            _writer?.WriteLine(lineOut);
         }
 
         public void Dispose()

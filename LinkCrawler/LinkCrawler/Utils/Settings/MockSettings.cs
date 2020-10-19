@@ -16,7 +16,9 @@ namespace LinkCrawler.Utils.Settings {
 
         public bool CsvOverwrite => true;
 
-        public bool OnlyReportBrokenLinksToOutput => false;
+        public bool ReportOnRedirect => true;
+
+        public bool ReportOnSuccess => true;
 
         public string SlackWebHookBotIconEmoji => ":homer:";
 

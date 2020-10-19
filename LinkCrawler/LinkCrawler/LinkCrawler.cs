@@ -21,7 +21,9 @@ namespace LinkCrawler
         private RestClient Client { get; }
         private IEnumerable<IOutput> Outputs { get; }
         public IValidUrlParser ValidUrlParser { get; set; }
-        private bool OnlyReportBrokenLinksToOutput { get; }
+        private bool ReportOnRedirect { get; }
+        private bool ReportOnSuccess { get; }
+
         public readonly List<LinkModel> UrlList;
         private readonly ISettings _settings;
         private readonly Stopwatch timer;
@@ -38,7 +40,9 @@ namespace LinkCrawler
             Client = new RestClient() { FollowRedirects = false }; // we don't want RestSharp following the redirects, otherwise we won't see them
             // https://stackoverflow.com/questions/8823349/how-do-i-use-the-cookie-container-with-restsharp-and-asp-net-sessions - set cookies up according to this link?
 
-            OnlyReportBrokenLinksToOutput = settings.OnlyReportBrokenLinksToOutput;
+            ReportOnRedirect = settings.ReportOnRedirect;
+            ReportOnSuccess = settings.ReportOnSuccess;
+
             _settings = settings;
             this.timer = new Stopwatch();
         }
@@ -46,7 +50,10 @@ namespace LinkCrawler
         public void Start()
         {
             this.timer.Start();
-            UrlList.Add(new LinkModel(BaseUrl));
+            lock (UrlList)
+            {
+                UrlList.Add(new LinkModel(BaseUrl));
+            }
             SendRequest(BaseUrl);
         }
 
@@ -55,14 +62,14 @@ namespace LinkCrawler
             var requestModel = new RequestModel(crawlUrl, referrerUrl, BaseUrl);
             Client.BaseUrl = new Uri(crawlUrl);
 
-            Client.ExecuteAsync(GetRequest, response =>
-            {
-                if (response == null)
-                    return;
+            var resp = Client.ExecuteAsync(GetRequest, response =>
+           {
+               if (response == null)
+                   return;
 
-                var responseModel = new ResponseModel(response, requestModel, _settings);
-                ProcessResponse(responseModel);
-            });
+               var responseModel = new ResponseModel(response, requestModel, _settings);
+               ProcessResponse(responseModel);
+           });
         }
 
         private void ProcessResponse(IResponseModel responseModel)
@@ -122,11 +129,25 @@ namespace LinkCrawler
                         output.WriteError(responseModel);
                     }
                 }
-                else if (!OnlyReportBrokenLinksToOutput)
+                else if (responseModel.IsRedirect && ReportOnRedirect)
                 {
                     foreach (var output in Outputs)
                     {
                         output.WriteInfo(responseModel);
+                    }
+                }
+                else
+                {
+                    if (ReportOnSuccess)
+                    {
+                        foreach (var output in Outputs)
+                        {
+                            output.WriteInfo(responseModel);
+                        }
+                    }
+                    else
+                    {
+                        Console.Write("\r{0}%            ", responseModel);
                     }
                 }
             }
@@ -158,7 +179,7 @@ namespace LinkCrawler
             this.timer.Stop();
             if (this._settings.PrintSummary)
             {
-                List<string> messages = new List<string>();
+                var messages = new List<string>();
                 messages.Add(""); // add blank line to differentiate summary from main output
 
                 messages.Add("Processing complete. Checked " + UrlList.Count() + " links in " + this.timer.ElapsedMilliseconds + "ms");
@@ -167,8 +188,8 @@ namespace LinkCrawler
                 messages.Add(" Status | # Links");
                 messages.Add(" -------+--------");
 
-                IEnumerable<IGrouping<int, string>> StatusSummary = UrlList.GroupBy(link => link.StatusCode, link => link.Address);
-                foreach (IGrouping<int, string> statusGroup in StatusSummary)
+                IEnumerable<IGrouping<int, string>> statusSummary = UrlList.GroupBy(link => link.StatusCode, link => link.Address);
+                foreach (IGrouping<int, string> statusGroup in statusSummary)
                 {
                     messages.Add($"   {statusGroup.Key}  | {statusGroup.Count(),5}");
                 }
