@@ -33,7 +33,7 @@ namespace LinkCrawler.Utils.Clients
 
             var client = new RestClient(WebHookUrl);
             var request = new RestRequest(Method.POST) { RequestFormat = DataFormat.Json };
-            request.AddBody(
+            request.AddJsonBody(
                 new
                 {
                     text = message,
