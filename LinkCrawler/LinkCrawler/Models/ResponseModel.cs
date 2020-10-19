@@ -16,12 +16,12 @@ namespace LinkCrawler.Models
         public IList<RestResponseCookie> Cookies { get; }
 
         public HttpStatusCode StatusCode { get; }
-        public int StatusCodeNumber { get { return (int)StatusCode; } }
+        public int StatusCodeNumber => (int)StatusCode;
         public bool IsSuccess { get; }
         public bool IsInteresting { get; }
         public bool IsRedirect { get; }
         public bool ShouldCrawl { get; }
-        private string ErrorMessage { get; }
+        public string ErrorMessage { get; }
 
         public ResponseModel(IRestResponse restResponse, RequestModel requestModel, ISettings settings)
         {
