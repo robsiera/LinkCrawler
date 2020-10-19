@@ -9,6 +9,7 @@ namespace LinkCrawler.Models
         string ReferrerUrl { get; }
         string Location { get; }
         HttpStatusCode StatusCode { get; }
+        string ErrorMessage { get; }
         int StatusCodeNumber { get; }
         bool IsSuccess { get; }
         bool IsInteresting { get; }

@@ -47,12 +47,14 @@ namespace LinkCrawler.Utils.Outputs
 
         private void Write(IResponseModel responseModel)
         {
-            _writer?.WriteLine("{1}{0}{2}{0}{3}{0}{4}",
+            _writer?.WriteLine("{1}{0}{2}{0}{3}{0}{4}{0}{5}",
                 _settings.CsvDelimiter,
                 responseModel.StatusCodeNumber,
                 responseModel.StatusCode,
                 responseModel.RequestedUrl,
-                responseModel.ReferrerUrl);
+                responseModel.ReferrerUrl,
+                responseModel.ErrorMessage
+                );
         }
 
         public void Dispose()
